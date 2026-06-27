@@ -15,7 +15,10 @@ import { writeLog } from 'backend/sync/log';
 export async function syncAvailability(items) {
     const results = [];
     for (const item of items) {
-        const mCode = item && item.mCode;
+        // Trim defensively: the 1C catalog space-pads M-codes ("М0049909   ").
+        // Stored codes are trimmed, so trim inbound too — padding from either
+        // side must never break an exact match.
+        const mCode = ((item && item.mCode) || '').trim();
         const available = !!(item && item.available);
         results.push(await applyOne(mCode, available));
     }

@@ -55,10 +55,13 @@ function variantSizeLabel(choices) {
 }
 
 // artikul -> normalizedSize -> [rows]. Товар only, must have an Артикул.
+// Note: the 1C export space-pads cells and writes goods as "Товар " (trailing
+// space); require an exact 'Товар' after trim, which also drops the ~232
+// empty-vid catalog-organization rows.
 function build1cIndex(rows1c) {
     const index = {};
     for (const r of rows1c) {
-        if (r.vid && r.vid.trim() !== 'Товар') continue;
+        if ((r.vid || '').trim() !== 'Товар') continue;
         const art = (r.artikul || '').trim();
         if (!art) continue;
         const nsize = normalizeSize(r.razmer);
@@ -111,8 +114,10 @@ export async function bootstrapMcodeIndex(rows1c, options = {}) {
             const ambiguous = candidates.length > 1;
 
             if (!dryRun) {
+                // Trim the M-code: the 1C export space-pads it ("М0049909   ").
+                // Storing it padded would break every runtime lookup.
                 await wixData.insert('M_Code_Index', {
-                    mCode: chosen.kod,
+                    mCode: (chosen.kod || '').trim(),
                     productId: product._id,
                     variantId,
                     parentArtikul,
@@ -122,8 +127,8 @@ export async function bootstrapMcodeIndex(rows1c, options = {}) {
 
                 if (ambiguous) {
                     await wixData.insert('BootstrapReview', {
-                        mCodeChosen: chosen.kod,
-                        mCodeAlternatives: sorted.slice(1).map(r => r.kod).join(';'),
+                        mCodeChosen: (chosen.kod || '').trim(),
+                        mCodeAlternatives: sorted.slice(1).map(r => (r.kod || '').trim()).join(';'),
                         parentArtikul, sizeLabel, productId: product._id, variantId,
                         reason: 'ambiguous_bootstrap'
                     }, { suppressAuth: true });
