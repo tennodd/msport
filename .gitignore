@@ -4,3 +4,6 @@ node_modules/
 .idea/
 .wix/
 jsconfig.json
+
+# Claude Code session config
+.claude/
