@@ -22,12 +22,19 @@ export async function findByMCode(mCode) {
 }
 
 /**
- * Stamp lastSynced on a mapping row. Best-effort — never throws.
+ * Stamp lastSynced and the last-known availability on a mapping row.
+ * `currentInStock` is denormalized here so reconciliation export stays O(1)/row.
+ * Best-effort — never throws.
  * @param {object} row a full M_Code_Index row (must include _id)
+ * @param {boolean} inStock the availability just applied to Wix
  */
-export async function touchLastSynced(row) {
+export async function markSynced(row, inStock) {
     try {
-        await wixData.update(COLLECTION, { ...row, lastSynced: new Date() }, { suppressAuth: true });
+        await wixData.update(
+            COLLECTION,
+            { ...row, lastSynced: new Date(), currentInStock: inStock },
+            { suppressAuth: true }
+        );
     } catch (e) {
         console.error('MAPPING: не вдалось оновити lastSynced', e);
     }

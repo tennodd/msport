@@ -22,6 +22,7 @@ flow resolves through this collection; nothing queries Stores by Артикул 
 | `variantId` | Text | Wix internal variant GUID. |
 | `parentArtikul` | Text | From 1C Артикул. Debugging/reconciliation aid. |
 | `sizeLabel` | Text | The Размер value captured at bootstrap time. |
+| `currentInStock` | Boolean | Last-known availability, denormalized on each sync so `exportMapping` stays O(1)/row. Empty until first synced. |
 | `lastSynced` | Date | Updated on every availability event. |
 | `notes` | Text | `ambiguous_bootstrap`, `manual_review`, etc. |
 
@@ -80,7 +81,7 @@ deleted 1C items). Don't block rollout; triaged manually.
 
 ## Manual dashboard steps (cannot be done from code)
 
-- [ ] Create `M_Code_Index` with the schema above; add unique index on `mCode`; Admin-only perms.
+- [ ] Create `M_Code_Index` with the schema above (incl. `currentInStock` Boolean); add unique index on `mCode`; Admin-only perms.
 - [ ] Add `mCode` column to `SyncLogs`.
 - [ ] Create `BootstrapReview` (phase 3).
 - [ ] Create `BootstrapUnmapped` (phase 3).
