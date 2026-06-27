@@ -79,10 +79,14 @@ deleted 1C items). Don't block rollout; triaged manually.
 
 ---
 
-## Manual dashboard steps (cannot be done from code)
+## Provisioning steps
 
-- [ ] Create `M_Code_Index` with the schema above (incl. `currentInStock` Boolean); add unique index on `mCode`; Admin-only perms.
-- [ ] Add `mCode` column to `SyncLogs`.
+Done remotely via the Wix REST API (Data Collections, Data Indexes, Secrets)
+rather than the dashboard — see the provisioning session.
+
+- [x] Create `M_Code_Index` with the schema above (incl. `currentInStock` Boolean); Admin-only perms. *(REST: POST /wix-data/v2/collections)*
+- [x] Unique, case-sensitive index `mCode_unique` on `mCode`. *(REST: POST /wix-data/v2/indexes)*
+- [x] `sync_token_1c` secret in Secrets Manager. *(REST: POST cloud-secrets-vault-server)*
+- [~] `mCode` column on `SyncLogs` — auto-added on first new-endpoint log write (no action).
 - [ ] Create `BootstrapReview` (phase 3).
 - [ ] Create `BootstrapUnmapped` (phase 3).
-- [ ] Wix Secrets Manager → add key `sync_token_1c` = a strong random token (phase 2 / security).

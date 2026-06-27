@@ -44,12 +44,12 @@ async function applyOne(mCode, available) {
 }
 
 // Catalog V1 inventory update. We set the per-variant `inStock` boolean and
-// never touch quantity. The mapping row already carries productId + variantId,
-// so no lookup against Stores by Артикул/size is needed.
-//
-// NOTE: confirm this payload shape against the Wix runtime during cutover
-// testing — `updateInventoryVariantFieldsByProductId(productId, inventoryItem)`
-// where inventoryItem carries a `variants` array.
+// never touch quantity. The mapping row already carries productId + variantId
+// (the variant's `_id` from getProductVariants), so no lookup against Stores by
+// Артикул/size is needed. Payload shape confirmed against the Velo docs:
+// updateInventoryVariantFieldsByProductId(productId, { variants: [{ variantId, inStock }] }).
+// Omitting trackQuantity leaves each product's tracking mode untouched; the
+// bootstrap is responsible for putting products into boolean (inStock) mode.
 async function setVariantInStock(productId, variantId, inStock) {
     await wixStoresBackend.updateInventoryVariantFieldsByProductId(productId, {
         variants: [{ variantId, inStock }]
